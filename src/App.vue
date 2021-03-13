@@ -1,28 +1,277 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="container">
+      <Header />
+      <Popup v-bind:popup="popup" v-on:closePopup="closePopup"/>
+      <Search v-on:search="search" />
+      <Characters 
+        v-bind:characters="characters" 
+        v-bind:filteredCharacters="filteredCharacters" 
+        v-bind:isLoading="isLoading"
+        v-bind:popup="openPopup"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
+import Header from './components/Header'
+import Characters from './components/Characters'
+import Search from './components/Search'
+import Popup from './components/Popup'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Characters,
+    Header,
+    Search,
+    Popup
+  },
+  data(){
+    return {
+      isLoading: true,
+      characters: [],
+      filteredCharacters: [],
+      popup: {
+        active: false,
+        character: {}
+      }
+    }
+  },
+  created(){
+    fetch('https://www.breakingbadapi.com/api/characters')
+      .then(res => res.json())
+      .then(data => {
+        this.characters = data;
+        this.isLoading = false;
+      })
+  },
+  methods: {
+    search(value){
+      this.filteredCharacters = this.characters.filter(character => character.name.toLowerCase().includes(value) || character.nickname.toLowerCase().includes(value))
+      console.log(value);
+      console.log(this.filteredCharacters);
+    },
+    openPopup(character){
+      this.popup.active = true;
+      this.popup.character = character;
+    },
+    closePopup(){
+      this.popup.active = false;
+      this.popup.character = {}
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: #000 url('assets/bg.jpg') no-repeat center center/cover;
+  height: 100vh;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+.btn {
+  display: inline-block;
+  color: #fff;
+  background-color: #3fb573;
+  font-size: 1em;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  padding: 10px 15px;
+  border: 0;
+  margin: 10px 0;
+}
+
+header {
+  height: 200px;
+}
+
+header img {
+  width: 200px;
+}
+
+.overflow{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, .5);
+  z-index: 10;
+  visibility: hidden;
+  transition: all .3s;
+}
+.overflow.active{
+  opacity: 1;
+  visibility: visible;
+}
+.popup{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #000;
+  padding: 50px 20px;
+  z-index: 99;
+  width: 40vw;
+  opacity: 0;
+  visibility: hidden;
+  transition: all .3s;
+}
+.popup.active{
+  opacity: 1;
+  visibility: visible;
+}
+.popup__close{
+  border: none;
+  background: transparent;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  font-size: 20px;
+  padding: 10px;
+}
+
+.popup__content{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.popup__content-img{
+  max-width: 200px;
+  margin: 10px;
+}
+.popup__title{
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+.popup__subtitle{
+  position: relative;
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+.popup__subtitle::before{
+  content: "or";
+}
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.img-center{
+  text-align: center;
+}
+.search {
+  height: 100px;
+}
+
+input[type='text'] {
+  display: block;
+  padding: 10px;
+  font-size: 20px;
+  border: 0;
+  border-radius: 5px;
+  width: 60%;
+  margin: auto;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  cursor: pointer;
+  background-color: transparent;
+  height: 300px;
+  perspective: 1000px;
+}
+
+.card h1 {
+  font-size: 25px;
+  border-bottom: 1px #fff solid;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.card img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.card:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.card-back {
+  background-color: #333;
+  color: white;
+  padding: 20px;
+  transform: rotateY(180deg);
+}
+
+.card li {
+  list-style: none;
+  padding-bottom: 10px;
+}
+
+@media (max-width: 800px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .popup{
+    width: 100vw;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 500px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
