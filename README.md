@@ -1,5 +1,7 @@
 # vue-breaking-bad
 
+https://vue-breaknig-bad.netlify.app
+
 ## Project setup
 ```
 npm install
